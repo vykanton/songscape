@@ -14,11 +14,12 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from www.recordings.models import Deployment, Recording, Snippet
+from www.settings import ORG
 
 BASE_PATH = '/kiwi/recordings'
 MIN_FILE_SIZE = 1000
 logging.basicConfig(
-    format='%(asctime)s %(levelname)s: %(message)s', 
+    format='%(asctime)s %(levelname)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     level=logging.INFO,
     filename='songscape-load-recordings.log')
@@ -28,9 +29,15 @@ class RecorderSiteError(Exception):
 
 def get_starttime(filename, count=0):
     """returns the start time, by parsing the filename of a WAV file from the DOC recorders"""
-    timestamp = mktime(strptime(filename, "%d%m%y_%H%M%S.wav"))
-    timestamp += count*60
-    return datetime.fromtimestamp(timestamp)
+    if ORG == "vuw":
+        filename_timestamp = filename[0:12]
+        timestamp = mktime(strptime(filename_timestamp, "%d%m%y%H%M%S"))
+        timestamp += count*60
+        return pytz.utc.localize(datetime.fromtimestamp(timestamp))
+    else:
+        timestamp = mktime(strptime(filename, "%d%m%y_%H%M%S.wav"))
+        timestamp += count*60
+        return datetime.fromtimestamp(timestamp)
 
 def get_md5(path):
     hasher = hashlib.md5()
@@ -46,7 +53,7 @@ def save_canonical(recording):
         new_path = recording.get_canonical_path()
         logging.debug('canonical location is: %s', new_path)
         if recording.path == new_path:
-            return 
+            return
         if os.path.exists(new_path) and recording.md5 == get_md5(new_path):
             recording.path = new_path
             recording.save()
@@ -113,17 +120,17 @@ class Command(BaseCommand):
                         recorder_code, site_code = get_recorder_site(path)
                         logging.debug('recorder %s and site %s: %s', recorder_code, site_code, path)
                         if site_code and recorder_code:
-                            deployment = Deployment.objects.get(recorder__code=recorder_code, 
+                            deployment = Deployment.objects.get(recorder__code=recorder_code,
                                 site__code=site_code,
-                                start__lt=starttime, 
+                                start__lt=starttime,
                                 end__gt=starttime)
                         elif recorder_code:
-                            deployment = Deployment.objects.get(recorder__code=recorder_code, 
-                                start__lt=starttime, 
+                            deployment = Deployment.objects.get(recorder__code=recorder_code,
+                                start__lt=starttime,
                                 end__gt=starttime)
                         elif site_code:
-                            deployment = Deployment.objects.get(site__code=site_code, 
-                                start__lt=starttime, 
+                            deployment = Deployment.objects.get(site__code=site_code,
+                                start__lt=starttime,
                                 end__gt=starttime)
                         else:
                             logging.error('no site or recorder identified in path: %s', path)
@@ -153,7 +160,7 @@ class Command(BaseCommand):
                                     snippet_overlap = 0
                                     snippet_minimum = 59.9
                                     seconds = 0
-                                    while seconds + snippet_minimum < length: 
+                                    while seconds + snippet_minimum < length:
                                         offset = max(seconds - snippet_overlap, 0)
                                         duration = min(snippet_length + 2*snippet_overlap, length - offset)
                                         Snippet(recording=recording, offset=offset, duration=duration).save()
@@ -176,4 +183,3 @@ class Command(BaseCommand):
                         break
                     #except:
                     #    logging.error('Hmmm. Something weird happened with this file: %s', path)
-                                
