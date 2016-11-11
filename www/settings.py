@@ -3,6 +3,8 @@ import os
 
 DEBUG = True
 
+ORG = "vuw"
+
 ADMINS = (
     ('Edward Abraham', 'edward@dragonfly.co.nz'),
 )
@@ -216,4 +218,3 @@ if 'test' in sys.argv or 'migrationcheck' in sys.argv:
         from .test_settings import *
     except ImportError:
         print "Can't find test_settings.py"
-
