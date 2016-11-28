@@ -76,21 +76,28 @@ def save_canonical(recording):
 
 def get_recorder_site(path):
     # check for Susan's new paths
-    m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
-    if m:
-        return m.groups()[0].upper(), None
-    m = re.match(".*/data_by_location/(?P<site>[a-zA-Z0-9]+)_.*", path)
-    if m:
-        return None, m.groups()[0].upper()
-    # First check for an Innes style path
-    m = re.match(".*/MIC_(?P<recorder>KR\w+).*/LOCATION_\d*_(?P<site>\w+)/.*", path)
-    if m:
-        return [x.upper() for x in m.groups()]
-    # check for recorder only paths
-    m = re.match(".*/(?P<recorder>kr\d+)[abAB]?/.*wav", path)
-    if m:
-        return m.groups()[0].upper(), None
-    raise RecorderSiteError
+    if ORG == "vuw":
+        filename = path
+        recorder = filename[16:22]
+        site = filename[12:16]
+        if recorder and site:
+	           return (recorder, site)
+    else:
+        m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
+        if m:
+            return m.groups()[0].upper(), None
+        m = re.match(".*/data_by_location/(?P<site>[a-zA-Z0-9]+)_.*", path)
+        if m:
+            return None, m.groups()[0].upper()
+        # First check for an Innes style path
+        m = re.match(".*/MIC_(?P<recorder>KR\w+).*/LOCATION_\d*_(?P<site>\w+)/.*", path)
+        if m:
+            return [x.upper() for x in m.groups()]
+        # check for recorder only paths
+        m = re.match(".*/(?P<recorder>kr\d+)[abAB]?/.*wav", path)
+        if m:
+            return m.groups()[0].upper(), None
+        raise RecorderSiteError
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
