@@ -92,9 +92,12 @@ def get_recorder_site(path):
     raise RecorderSiteError
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('data_directory')
     def handle(self, *args, **options):
+        data_dir = options['data_directory']
         logging.debug("started")
-        for root, dirs, files in os.walk(args[0]):
+        for root, dirs, files in os.walk(data_dir):
             for f in files:
                 if f.endswith('.wav'):
                     # First check to see if it exists
