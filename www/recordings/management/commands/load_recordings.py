@@ -8,6 +8,7 @@ import hashlib
 from contextlib import closing
 import logging
 import traceback
+import pytz
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
