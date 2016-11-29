@@ -7,6 +7,7 @@ from django.core.management.base import BaseCommand
 
 from www.recordings.models import Organisation, Site, Recorder, Deployment
 
+from www.settings import ORG
 
 DIR = 'www/fixtures'
 
@@ -18,7 +19,11 @@ class Command(BaseCommand):
             o = Organisation(code=row['Code'], name=row['Name'])
             o.save()
 
-        rfpt_org = Organisation.objects.get(code='RFPT')
+        if ORG == "vuw":
+            vicu_org = Organisation.objects.get(code='VICU')
+        else:
+            rfpt_org = Organisation.objects.get(code='RFPT')
+
         sites = csv.DictReader(open(os.path.join(DIR, 'Sites.csv')))
         for row in sites:
             if not row['Latitude'].strip():
@@ -26,13 +31,21 @@ class Command(BaseCommand):
             if not row['Longitude'].strip():
                 row['Longitude'] = None
 
-            o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=rfpt_org)
-            o.save()
+            if ORG == "vuw":
+                o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=vicu_org)
+                o.save()
+            else:
+                o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=rfpt_org)
+                o.save()
 
         recorders = csv.DictReader(open(os.path.join(DIR, 'Recorders.csv')))
         for row in recorders:
-            o = Recorder(code=row['Code'], organisation=rfpt_org)
-            o.save()
+            if ORG == "vuw":
+                o = Recorder(code=row['Code'], organisation=vicu_org)
+                o.save()
+            else:
+                o = Recorder(code=row['Code'], organisation=rfpt_org)
+                o.save()
 
         deployments = csv.DictReader(open(os.path.join(DIR, 'Deployments.csv')))
         for row in deployments:
@@ -48,5 +61,9 @@ class Command(BaseCommand):
                 end = datetime.strptime(row['Recovery_date'] + ' ' + row['Recovery_time'], '%d/%m/%Y %H:%M:%S')
             else:
                 end = None
-            o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=rfpt_org)
-            o.save()
+            if ORG == "vuw":
+                o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=vicu_org)
+                o.save()
+            else:
+                o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=rfpt_org)
+                o.save()
