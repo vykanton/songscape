@@ -77,7 +77,7 @@ def save_canonical(recording):
 def get_recorder_site(path):
     # check for Susan's new paths
     if ORG == "vuw":
-        filename = path
+        filename = path.split('/')[-1] # split path on / and take the last component ie the filename
         recorder = filename[16:22]
         site = filename[12:16]
         if recorder and site:
