@@ -1,5 +1,6 @@
 import csv
 import os
+import pytz
 
 from datetime import datetime
 
@@ -53,9 +54,9 @@ class Command(BaseCommand):
             recorder = Recorder.objects.get(code=row['Recorder'].strip())
             if ORG == "vuw":
                 start = row['Start']
-                start = datetime.strptime(start,'%d/%m/%y')
+                start = pytz.utc.localize(datetime.strptime(start,'%d/%m/%y'))
                 end = row['End']
-                end = datetime.strptime(end,'%d/%m/%y')
+                end = pytz.utc.localize(datetime.strptime(end,'%d/%m/%y'))
             else:
                 if not row['Deploy_time']:
                     row['Deploy_time'] = '00:00:00'
@@ -68,7 +69,7 @@ class Command(BaseCommand):
                     end = None
 
             if ORG == "vuw":
-                o = Deployment(site=site, recorder=recorder, start=start, end=end, comments='NA', owner=vicu_org)
+                o = Deployment(site=site, recorder=recorder, start=start, end=end, comments='NA', owner=vicu_org, start_timezone='UTC')
                 o.save()
             else:
                 o = Deployment(site=site, recorder=recorder, start=start, end=end, comments=row['Comments'], owner=rfpt_org)
