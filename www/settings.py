@@ -4,6 +4,7 @@ import os
 DEBUG = True
 
 ORG = "vuw"
+SNIP_SUBSAMPLE_STEP = 1 #subsample step.  ie 4 is every 4th snippet of each recording.
 
 ADMINS = (
     ('Edward Abraham', 'edward@dragonfly.co.nz'),
