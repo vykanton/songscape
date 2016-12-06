@@ -73,7 +73,7 @@ TEMPLATES = [
             os.path.join(PROJECT_DIR, "templates"),
         ],
         'APP_DIRS': True,
-        'DEBUG': DEBUG,
+        # 'DEBUG': DEBUG,
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
