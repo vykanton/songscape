@@ -8,14 +8,12 @@ import hashlib
 from contextlib import closing
 import logging
 import traceback
-import pytz
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db import IntegrityError
 
 from www.recordings.models import Deployment, Recording, Snippet
-from www.settings import ORG
 
 BASE_PATH = '/kiwi/recordings'
 MIN_FILE_SIZE = 1000
@@ -30,15 +28,9 @@ class RecorderSiteError(Exception):
 
 def get_starttime(filename, count=0):
     """returns the start time, by parsing the filename of a WAV file from the DOC recorders"""
-    if ORG == "vuw":
-        filename_timestamp = filename[0:12]
-        timestamp = mktime(strptime(filename_timestamp, "%d%m%y%H%M%S"))
-        timestamp += count*60
-        return pytz.utc.localize(datetime.fromtimestamp(timestamp))
-    else:
-        timestamp = mktime(strptime(filename, "%d%m%y_%H%M%S.wav"))
-        timestamp += count*60
-        return datetime.fromtimestamp(timestamp)
+    timestamp = mktime(strptime(filename, "%d%m%y_%H%M%S.wav"))
+    timestamp += count*60
+    return datetime.fromtimestamp(timestamp)
 
 def get_md5(path):
     hasher = hashlib.md5()
@@ -76,36 +68,26 @@ def save_canonical(recording):
 
 def get_recorder_site(path):
     # check for Susan's new paths
-    if ORG == "vuw":
-        filename = path.split('/')[-1] # split path on / and take the last component ie the filename
-        recorder = filename[16:22]
-        site = filename[12:16]
-        if recorder and site:
-	           return (recorder, site)
-    else:
-        m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
-        if m:
-            return m.groups()[0].upper(), None
-        m = re.match(".*/data_by_location/(?P<site>[a-zA-Z0-9]+)_.*", path)
-        if m:
-            return None, m.groups()[0].upper()
-        # First check for an Innes style path
-        m = re.match(".*/MIC_(?P<recorder>KR\w+).*/LOCATION_\d*_(?P<site>\w+)/.*", path)
-        if m:
-            return [x.upper() for x in m.groups()]
-        # check for recorder only paths
-        m = re.match(".*/(?P<recorder>kr\d+)[abAB]?/.*wav", path)
-        if m:
-            return m.groups()[0].upper(), None
-        raise RecorderSiteError
+    m = re.match(".*/data_by_location/(?P<recorder>KR[A-Z0-9]+)_.*", path)
+    if m:
+        return m.groups()[0].upper(), None
+    m = re.match(".*/data_by_location/(?P<site>[a-zA-Z0-9]+)_.*", path)
+    if m:
+        return None, m.groups()[0].upper()
+    # First check for an Innes style path
+    m = re.match(".*/MIC_(?P<recorder>KR\w+).*/LOCATION_\d*_(?P<site>\w+)/.*", path)
+    if m:
+        return [x.upper() for x in m.groups()]
+    # check for recorder only paths
+    m = re.match(".*/(?P<recorder>kr\d+)[abAB]?/.*wav", path)
+    if m:
+        return m.groups()[0].upper(), None
+    raise RecorderSiteError
 
 class Command(BaseCommand):
-    def add_arguments(self, parser):
-        parser.add_argument('data_directory')
     def handle(self, *args, **options):
-        data_dir = options['data_directory']
         logging.debug("started")
-        for root, dirs, files in os.walk(data_dir):
+        for root, dirs, files in os.walk(args[0]):
             for f in files:
                 if f.endswith('.wav'):
                     # First check to see if it exists
@@ -194,3 +176,4 @@ class Command(BaseCommand):
                         break
                     #except:
                     #    logging.error('Hmmm. Something weird happened with this file: %s', path)
+                                
