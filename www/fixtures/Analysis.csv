@@ -1,4 +1,2 @@
-Id_analysis,Name_analysis,Code_analysis,Description_analysis,Datetime_analysis,User_id_analysis,Id_tag,Name_tag,Code_tag,Analysis_tag
-1,Hihi_ID,vuw-hihi,An analysis to detect hihi/stitchbird (Notiomystis cincta) calls, 2016-12-12 15.51.07.745331+13,Victor,1,Hihi,Not_cin,Hihi_ID
-1,Hihi_ID,vuw-hihi,An analysis to detect hihi/stitchbird (Notiomystis cincta) calls, 2016-12-12 15.51.07.745331+13,Victor,2,Other,Other,Hihi_ID
-1,Hihi_ID,vuw-hihi,An analysis to detect hihi/stitchbird (Notiomystis cincta) calls, 2016-12-12 15.51.07.745331+13,Victor,3,Unknown,Unknown,Hihi_ID
+Id,Name,Code,Description,Datetime,User_id
+1,Hihi_ID,vuw-hihi,An analysis to detect hihi/stitchbird (Notiomystis cincta) calls, 2016-12-12 15.51.07.745331+13,Victor

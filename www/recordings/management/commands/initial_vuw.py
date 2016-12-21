@@ -6,7 +6,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-from www.recordings.models import Organisation, Site, Recorder, Deployment
+from www.recordings.models import Organisation, Site, Recorder, Deployment, Tag, Analysis
 
 from www.settings import ORG
 
