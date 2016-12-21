@@ -28,11 +28,9 @@ class Command(BaseCommand):
             already = snippets.filter(sets__analysis=analysis)
             snippets = Snippet.objects.all()
             n_snippets = snippets.count()
-
             #select by kiwi score
             kiwi_snippets = snippets.filter(scores__detector=detector,
                 scores__score__gt=25).exclude(id__in=already)
-
             #Now select a random 2%
             random_snippets = []
             if len(random_already) < round(0.02*n_snippets):
