@@ -48,8 +48,12 @@ class Command(BaseCommand):
             o = Deployment(site=site, recorder=recorder, start=start, end=end, comments='NA', owner=vicu_org, start_timezone='UTC')
             o.save()
 
+        tags = csv.DictReader(open(os.path.join(DIR, 'Tags.csv')))
+        for row in analysis:
+            o = Tag(code=row['Code'], name=row['Name'])
+            o.save()
+
         analysis = csv.DictReader(open(os.path.join(DIR, 'Analysis.csv')))
         for row in analysis:
-            o = Analysis(name=row['Name_analysis'], code=row['Code_analysis'], description=row['Description_analysis'])
-            o = Tag(code=row['Code_tag'], name=row['Name_tag'])
+            o = Analysis(name=row['Name'], code=row['Code'], description=row['Description'])
             o.save()
