@@ -49,11 +49,11 @@ class Command(BaseCommand):
             o.save()
 
         tags = csv.DictReader(open(os.path.join(DIR, 'Tags.csv')))
-        for row in analysis:
+        for row in tags:
             o = Tag(code=row['Code'], name=row['Name'])
             o.save()
 
         analysis = csv.DictReader(open(os.path.join(DIR, 'Analysis.csv')))
         for row in analysis:
-            o = Analysis(name=row['Name'], code=row['Code'], description=row['Description'])
+            o = Analysis(name=row['Name'], code=row['Code'], description=row['Description'], user_id=row['User_id'])
             o.save()
