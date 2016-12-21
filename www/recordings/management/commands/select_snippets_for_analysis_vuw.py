@@ -7,7 +7,7 @@ from www.recordings.models import Snippet, Analysis, AnalysisSet, Detector, Scor
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        analysis = Analysis.objects.get(code='hihi')
+        analysis = Analysis.objects.get(code='hihi_id')
         deployments = Deployment.objects.all()
         clipping = Detector.objects.get(code='amplitude')
         code = 'hihi'
