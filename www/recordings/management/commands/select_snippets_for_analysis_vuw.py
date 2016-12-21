@@ -7,27 +7,39 @@ from www.recordings.models import Snippet, Analysis, AnalysisSet, Detector, Scor
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        analysis = Analysis.objects.get(code='hihi')
+        analysis = Analysis.objects.get(code='hihi_id')
         deployments = Deployment.objects.all()
         clipping = Detector.objects.get(code='amplitude')
-        code = 'hihi'
-        version = '0.1'
+        code = 'simple-north-island-brown-kiwi'
+        version = '0.1.2'
         detector = Detector.objects.get(code=code, version=version)
         for deployment in deployments:
+            # get unclipped_snippets
+            snippets = Snippet.objects.\
+                filter(recording__deployment=deployment).\
+                filter(scores__detector = detector, scores__score__lt = 1e10).\
+                filter(scores__detector = \
+                    Detector.objects.get(code='amplitude'), scores__score__lt=32000)
+            n_snippets = snippets.count()
+            random_already = snippets.filter(sets__analysis=analysis,
+                sets__selection_method=u'Randomly selected 2%')
+            kiwi_already = snippets.filter(sets__analysis=analysis,
+                sets__selection_method=u'Simple NIBK score higher than 25 ')
+            already = snippets.filter(sets__analysis=analysis)
             snippets = Snippet.objects.all()
             n_snippets = snippets.count()
-            #Select only morning recordings
-            morn_recordings = []
-            for r in recording_datetime:
-                recording_hour = r.hour
-                if recordings_start < 11 and recordings_start > 06:
-                    morn_recordings = morn_recordings.append(recording_file)
-            #Select a random 5 snippets
+
+            #select by kiwi score
+            kiwi_snippets = snippets.filter(scores__detector=detector,
+                scores__score__gt=25).exclude(id__in=already)
+
+            #Now select a random 2%
             random_snippets = []
-            five_snippets = []
-            for recording_file in recording:
-                random_snippets = list(snippets.order_by('?'))
-                five_snippets = random_snippets[0:5]
+            if len(random_already) < round(0.02*n_snippets):
+                random_snippets = list(snippets.\
+                    exclude(id__in=already).\
+                    exclude(id__in=kiwi_snippets).\
+                    order_by('?')[:(round(n_snippets*0.02) - len(random_already))])
 
             snippet_set = zip(random_snippets, ['Randomly selected 2%']*len(random_snippets)) +\
                 zip(list(kiwi_snippets), ['Simple NIBK score higher than 25 ']*len(kiwi_snippets))
