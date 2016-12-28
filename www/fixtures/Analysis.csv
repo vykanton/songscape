@@ -1,2 +1,4 @@
 Id,Name,Code,Description,Datetime,User_id
 1,Hihi_ID,vuw-hihi,An analysis to detect hihi/stitchbird (Notiomystis cincta) calls, 2016-12-12 15.51.07.745331+13,1
+2,Tieke_ID,vuw-tieke,An analysis to detect tieke/saddleback (Philesturnus rufusater) calls, 2016-12-12 15.51.07.745331+13,1
+3,Kakariki_ID,vuw-kakariki,An analysis to detect kakariki/red-crowned parakeet (Cyanoramphus novaezelandiae) calls, 2016-12-12 15.51.07.745331+13,1 
