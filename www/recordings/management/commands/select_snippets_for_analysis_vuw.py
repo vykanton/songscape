@@ -8,22 +8,31 @@ from www.recordings.models import Snippet, Analysis, AnalysisSet, Detector, Scor
 class Command(BaseCommand):
     def handle(self, *args, **options):
         analysis = Analysis.objects.get(code='hihi_id')
-        deployments = Deployment.objects.all()
         clipping = Detector.objects.get(code='amplitude')
-        snippet = Snippet.objects.all()
+        snippets = Snippet.objects.all()
         code = 'simple-north-island-brown-kiwi'
         version = '0.1.2'
         detector = Detector.objects.get(code=code, version=version)
-        for deployment in deployments:
-            snippets = Snippet.objects.\
-                filter(recording__deployment=deployment)
-            already = snippets.filter(sets__analysis=analysis)
+        already = snippets.filter(sets__analysis=analysis)
+        score= Score.objects.all()
 
-            #select by kiwi score
-            hihi_snippets = snippets.filter(scores__detector=detector,
-                scores__score__gt=25).exclude(id__in=already)
-
-            print deployment, len(already), len(hihi_snippets)
-
-            for snip in hihi_snippets:
+        #select snippets by kiwi score
+        #max_score=max(score)
+        max_score=40
+        threshold_score=25
+        category_length=5
+        score_categories=range(threshold_score,max_score+category_length,category_length)
+        #number of snippets per category
+        snippet_category=3
+        hihi_snippets = snippets.filter(scores__detector=detector,
+            scores__score__gt=threshold_score).exclude(id__in=already)
+        #Now select random snippets within each score category
+        #hihi_snippets
+        random_snippets = []
+        for category in score_categories:
+            #print(hihi_snippets.count(),"category",category,category+category_length)
+            random_snippets = list(hihi_snippets.filter(scores__score__range=(category,category+category_length)))
+            #Save the snippets selected
+            for snip in random_snippets[:snippet_category]:
+                #print(snip)
                 AnalysisSet(analysis=analysis, snippet=snip,selection_method=detector).save()
