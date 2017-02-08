@@ -17,7 +17,6 @@ NONHIHI_PATH = '/sample_calls/nonhihi'
 class Command(BaseCommand):
     def handle(self, *args, **options):
         #code to create sample calls of hihi
-        1/0
         hihitag= Tag.objects.filter(name='Hihi').values('id')
         allanalysisset=AnalysisSet.objects.all()
         for analysissetid in allanalysisset:
