@@ -196,8 +196,8 @@ CACHES = {
 
 # Audio and sonogram quality settings
 MAX_FRAMERATE = 8000
-MIN_FREQ=500
-MAX_FREQ=4000
+MIN_FREQ=2000
+MAX_FREQ=12000
 N_FFT=512
 
 
