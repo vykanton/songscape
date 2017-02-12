@@ -2,17 +2,25 @@
 TFGraphDetector with some hardcoded parameters to point to a pre-trained
 Hihi detector."""
 import os
+import numpy as np
 import sys
 import time
 import io
 import numpy as np
 
-from django.core.management.base import BaseCommand
 from kokako.score import Detector
+import imp
+TFGraphUser=imp.load_source('TFGraphUser','/opt/kokako/kokako/detectors/tfgraph.py')
+
+from django.core.management.base import BaseCommand
 from www.recordings.models import Score, Recording, Snippet, Detector
 from wavy import get_audio
 from kokako.score import Audio
-from kokako.detectors.tfgraph import TFGraphUser
+#from kokako.detectors.tfgraph import TFGraphUser
+
+
+
+
 
 class HihiCNN(Detector, TFGraphUser):
     code = 'hihi'
