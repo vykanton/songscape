@@ -17,7 +17,7 @@ class Command(BaseCommand):
             maching_snippets_subsample = matching_snippets[0::SNIP_SUBSAMPLE_STEP] # last number in bracket is subsample step.  ie [0:4] is every 4th
             for snippet in maching_snippets_subsample:
                 try:
-                    wavy.slice_wave(recording.path, os.path.join(BASE_DIR, snippet.get_soundfile_name()), snippet.offset, snippet.duration, 12000)
+                    wavy.slice_wave(recording.path, os.path.join(BASE_DIR, snippet.get_soundfile_name()), snippet.offset, snippet.duration, 24000)
                 except Recording.DoesNotExist:
                     print "Can't find the recording on row %s at path %s" % (i, path)
                 except:
