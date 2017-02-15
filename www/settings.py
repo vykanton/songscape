@@ -195,11 +195,10 @@ CACHES = {
 
 
 # Audio and sonogram quality settings
-MAX_FRAMERATE = 8000
+MAX_FRAMERATE = 24000
 MIN_FREQ=2000
 MAX_FREQ=12000
 N_FFT=512
-
 
 # MEDIA_ROOT can be overridden in local_settings
 SONOGRAM_DIR = 'sonograms/'

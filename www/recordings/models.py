@@ -150,15 +150,15 @@ class Recording(models.Model):
 
     def get_canonical_path(self):
         owner_dir = self.deployment.owner.code
-        deployment_dir = "%s-%s" % (self.deployment.site.code, 
+        deployment_dir = "%s-%s" % (self.deployment.site.code,
             self.deployment.start.\
                 astimezone(pytz.timezone(self.deployment.start_timezone)).\
-                strftime('%Y-%m-%d')) 
-        name = "%s-%s-%s.wav" % (self.deployment.owner.code, 
-            self.deployment.site.code, 
-            isotime(self.datetime), 
+                strftime('%Y-%m-%d'))
+        name = "%s-%s-%s.wav" % (self.deployment.owner.code,
+            self.deployment.site.code,
+            isotime(self.datetime),
             )
-        return os.path.join(settings.RECORDINGS_ROOT, 
+        return os.path.join(settings.RECORDINGS_ROOT,
             owner_dir,
             deployment_dir,
             name)
@@ -244,25 +244,25 @@ class Snippet(models.Model):
             audio, framerate =  self.get_audio(max_framerate=max_framerate)
             Pxx, freqs, bins, im  = specgram(
                 audio,
-                NFFT=n_fft, 
+                NFFT=n_fft,
                 Fs=framerate
             )
             f = where(logical_and(freqs > min_freq, freqs <= max_freq))[0]
-            Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
-            Pxx[where(Pxx < percentile(Pxx[f].flatten(), 0.01))] =  percentile(Pxx[f].flatten(), 0.01)
+            # Pxx[where(Pxx > percentile(Pxx[f].flatten(), 99.99))] =  percentile(Pxx[f].flatten(), 99.99)
+            # Pxx[where(Pxx < percentile(Pxx[f].flatten(), 0.01))] =  percentile(Pxx[f].flatten(), 0.01)
             clf()
             fig = figure(figsize=(float(width)/dpi, float(height)/dpi), dpi=dpi)
-            imshow(flipud(10*log10(Pxx[f,])), 
-                extent=(bins[0], bins[-1], freqs[f][0], freqs[f][-1]), 
-                aspect='auto', 
-                cmap=cm.gray )
+            imshow(flipud(10*log10(Pxx[f,])),
+                   extent=(bins[0], bins[-1], min_freq, max_freq),
+                   aspect='auto',
+                   cmap=cm.gray )
             gca().set_ylabel('Frequency (Hz)')
             gca().set_xlabel('Time (s)')
             axis_pixels = gca().transData.transform(np.array((gca().get_xlim(), gca().get_ylim())).T)
             st, created = SonogramTransform.objects.get_or_create(
                 n_fft=n_fft,
                 framerate=framerate,
-                min_freq=min_freq, 
+                min_freq=min_freq,
                 max_freq=max_freq,
                 duration=self.duration,
                 width=width,
@@ -270,7 +270,7 @@ class Snippet(models.Model):
                 dpi=dpi,
                 top_px=max(axis_pixels[:,1]),
                 bottom_px=min(axis_pixels[:,1]),
-                left_px=min(axis_pixels[:,0]), 
+                left_px=min(axis_pixels[:,0]),
                 right_px=max(axis_pixels[:,0]),
                 )
             savefig(open(path, 'wb'), format='jpg', dpi=dpi)
@@ -386,7 +386,7 @@ class AnalysisSet(models.Model):
     snippet = models.ForeignKey(Snippet, related_name="sets",  on_delete=models.CASCADE)
     selection_method = models.TextField(default="")
     datetime = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         unique_together = (('analysis', 'snippet'),)
 
@@ -394,8 +394,8 @@ class Identification(models.Model):
     user = models.ForeignKey(User, related_name="identifications",  on_delete=models.CASCADE)
     analysisset = models.ForeignKey(AnalysisSet, related_name="identifications",  on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
-    tags = models.ManyToManyField(Tag, related_name="identifications") 
-    tag_set = models.ManyToManyField(Tag) 
+    tags = models.ManyToManyField(Tag, related_name="identifications")
+    tag_set = models.ManyToManyField(Tag)
     comment = models.TextField(default="")
 
     class Meta:
@@ -406,12 +406,9 @@ class CallLabel(models.Model):
     user = models.ForeignKey(User, related_name="call_labels",  on_delete=models.CASCADE)
     analysisset = models.ForeignKey(AnalysisSet, related_name="call_labels",  on_delete=models.CASCADE)
     datetime = models.DateTimeField(auto_now=True)
-    tag = models.ForeignKey(Tag, related_name="call_labels",  on_delete=models.CASCADE) 
+    tag = models.ForeignKey(Tag, related_name="call_labels",  on_delete=models.CASCADE)
     tag_set = models.ManyToManyField(Tag)
     start_time = models.FloatField()
     end_time = models.FloatField()
     low_frequency = models.FloatField()
     high_frequency = models.FloatField()
-
-
-
