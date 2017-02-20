@@ -4,7 +4,7 @@ import shutil
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-from www.recordings.models import Identification, CallLabel, Scores
+from www.recordings.models import Identification, CallLabel, Score
 
 # Normalise the call time
 def standardize(t):
@@ -28,14 +28,14 @@ class Command(BaseCommand):
         user = options.get('user', '')
         #tags = CallLabel.objects.filter(tag__name="Hihi")
         tags = args[1:]
-        print ("tags",tags,"analysis",analysis)
+        print ("tags=",tags,"analysis=",analysis)
         identifications = Identification.objects.filter(analysisset__analysis__code=analysis)
-        print identifications
+        print ("identifications=",identifications)
         if user:
             identifications = identifications.filter(user__username=user)
 
         call_labels = CallLabel.objects.filter(analysisset__analysis__code=analysis)
-        print call_labels
+        print ("call_lables=",call_labels)
         if user:
             call_labels = call_labels.filter(user__username=user)
 
@@ -43,8 +43,8 @@ class Command(BaseCommand):
         if options['get_snippets']:
             print "Creating snippets"
             path = '/sample_calls'
-            scores = Scores.objects.filter(analysisset__snippet=snippet)
-            print scores
+            #scores = Scores.objects.filter(analysisset__snippet=snippet)
+            #print scores
             for identification in identifications:
                 name = identification.analysisset.snippet.get_soundfile_name()
                 if not os.path.exists(os.path.join(path, name)):
@@ -53,11 +53,16 @@ class Command(BaseCommand):
         #process the calls
         calls = {}
         for identification in identifications:
+            snippet_score=Score.objects.filter(snippet__id=identification.analysisset.snippet.id).values_list('score',flat=True)[0]
+            print("score1=",snippet_score)
+            #TODO add the score for each snippet
             calls[identification.analysisset.snippet.get_soundfile_name()] = []
 
         for call in call_labels:
             if call.tag.code in tags:
-                calls[call.analysisset.snippet.get_soundfile_name()].append((standardize(call.start_time), standardize(call.end_time), call.score))
+                snippet_score=Score.objects.filter(snippet__id=call.analysisset.snippet.id).values_list('score',flat=True)[0]
+                print("score2=",snippet_score)
+                calls[call.analysisset.snippet.get_soundfile_name()].append((standardize(call.start_time),standardize(call.end_time)))
 
         # Now output the data
         output = open('call-labels-%s.txt' % ('-'.join(tags)), 'w')
