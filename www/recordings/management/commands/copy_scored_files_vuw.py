@@ -4,7 +4,7 @@ import shutil
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
-from www.recordings.models import Identification, CallLabel
+from www.recordings.models import Identification, CallLabel, Scores
 
 # Normalise the call time
 def standardize(t):
@@ -24,15 +24,18 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        analysis = "hihi_id"
+        analysis = args[0]
         user = options.get('user', '')
-        tags = CallLabel.objects.filter(tag__name="Hihi")
-        print tags
+        #tags = CallLabel.objects.filter(tag__name="Hihi")
+        tags = args[1:]
+        print ("tags",tags,"analysis",analysis)
         identifications = Identification.objects.filter(analysisset__analysis__code=analysis)
+        print identifications
         if user:
             identifications = identifications.filter(user__username=user)
 
         call_labels = CallLabel.objects.filter(analysisset__analysis__code=analysis)
+        print call_labels
         if user:
             call_labels = call_labels.filter(user__username=user)
 
@@ -40,6 +43,8 @@ class Command(BaseCommand):
         if options['get_snippets']:
             print "Creating snippets"
             path = '/sample_calls'
+            scores = Scores.objects.filter(analysisset__snippet=snippet)
+            print scores
             for identification in identifications:
                 name = identification.analysisset.snippet.get_soundfile_name()
                 if not os.path.exists(os.path.join(path, name)):
@@ -52,7 +57,7 @@ class Command(BaseCommand):
 
         for call in call_labels:
             if call.tag.code in tags:
-                calls[call.analysisset.snippet.get_soundfile_name()].append((standardize(call.start_time), standardize(call.end_time)))
+                calls[call.analysisset.snippet.get_soundfile_name()].append((standardize(call.start_time), standardize(call.end_time), call.score))
 
         # Now output the data
         output = open('call-labels-%s.txt' % ('-'.join(tags)), 'w')
