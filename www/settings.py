@@ -41,6 +41,10 @@ MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 # Absolute filesystem path to the directory that will hold species sample calls.
 TRAINING_PATH = '/sample_calls'
 
+# Absolute filesystem path to the directory that will hold Neural network detectors.
+DETECTOR_PATH = '/opt/songscape/detectors/'
+HIHI_DETECTOR = DETECTOR_PATH+'hihi.pb'
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"

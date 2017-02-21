@@ -13,10 +13,12 @@ from wavy import get_audio
 from wave import Error as WaveError
 
 from www.recordings.models import Score, Recording, Snippet, Detector
+from www.settings import HIHI_DETECTOR
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        detectors=[HihiCNN()]
+        detectors=[HihiCNN(HIHI_DETECTOR)]
         db_detectors = []
         now = time.time()
         for detector in detectors:
