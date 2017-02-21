@@ -4,8 +4,8 @@ import shutil
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 from www.settings import TRAINING_PATH, MEDIA_ROOT, SNIPPET_DIR
+from www.recordings.models import Identification, CallLabel, Score, Snippet
 
-from www.recordings.models import Identification, CallLabel, Score
 import wavy
 
 
@@ -52,23 +52,38 @@ class Command(BaseCommand):
         #         if call.tag.code in tags:
         #             audioname = call.analysisset.snippet.get_soundfile_name()
         #             identification.analysisset.snippet.save_calls(replace=False, path=path, max_framerate=24000)
-
+        buffer_label=0.1
         for call in call_labels:
             if call.tag.code in tags:
-                buffer_label=0.1
-                call_start=call.start_time-buffer_label
-                call_length=buffer_label+call.end_time-call_start
-                audioname = call.analysisset.snippet.get_soundfile_name()
-                output_name= audioname
-                #TODO output_name= call_start,audioname
-                print(call_start,audioname)
-                outputpath = os.path.join(TRAINING_PATH, output_name)
-                inputpath = os.path.join(MEDIA_ROOT,SNIPPET_DIR,audioname)
-                print(inputpath,outputpath)
-                wav_file = open(inputpath, 'w')
-                wavy.slice_wave(inputpath,outputpath,call_start,call_length, max_framerate=24000)
-                wav_file.close()
-                #identification.analysisset.snippet.save_call(replace=False, path=path, max_framerate=24000)
+                hihi_snippets=Snippet.objects.filter(id=call.analysisset.snippet.id)
+                #print(hihi_snippets)
+                for snippet in hihi_snippets:
+                    #snippet.save_call(replace=False,  max_framerate=24000)                    
+                    call_start=round(call.start_time-buffer_label,1)
+                    call_length=round(buffer_label+call.end_time-call_start,1)
+                    audioname = call.analysisset.snippet.get_soundfile_name()
+                    output_name= audioname
+                    #TODO output_name= call_start,audioname
+                    print(call_start,output_name)
+                    outputpath = os.path.join(TRAINING_PATH, output_name)
+                    inputpath = os.path.join(MEDIA_ROOT,SNIPPET_DIR,audioname)
+                    print(inputpath,outputpath,call_start,call_length,24000)
+                    wavy.slice_wave(inputpath,outputpath,call_start,call_length, max_framerate=24000)
+
+                    # buffer_label=0.1
+                    # call_start=round(call.start_time-buffer_label,1)
+                    # call_length=round(buffer_label+call.end_time-call_start,1)
+                    # audioname = call.analysisset.snippet.get_soundfile_name()
+                    # output_name= audioname
+                    # #TODO output_name= call_start,audioname
+                    # print(call_start,audioname)
+                    # outputpath = os.path.join(TRAINING_PATH, output_name)
+                    # inputpath = os.path.join(MEDIA_ROOT,SNIPPET_DIR,audioname)
+                    # print(inputpath,outputpath,call_start,call_length,24000)
+                    # wav_file = open(inputpath, 'w')
+                    # wavy.slice_wave(inputpath,outputpath,call_start,call_length, max_framerate=24000)
+                    # wav_file.close()
+                    # #identification.analysisset.snippet.save_call(replace=False, path=path, max_framerate=24000)
 
 
         # #process the calls
