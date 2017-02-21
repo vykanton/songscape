@@ -10,8 +10,6 @@ BASE_DIR = 'www/media/snippets'
 class Command(BaseCommand):
     def handle(self, *args, **options):
         all_recordings = Recording.objects.all()
-        #Select only morning recordings
-        morn_recordings = all_recordings.filter(datetime__hour__range=(05, 10))
         for recording in all_recordings:
             matching_snippets = Snippet.objects.filter(recording=recording)
             maching_snippets_subsample = matching_snippets[0::SNIP_SUBSAMPLE_STEP] # last number in bracket is subsample step.  ie [0:4] is every 4th
