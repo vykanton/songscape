@@ -298,22 +298,17 @@ class Snippet(models.Model):
             wav_file.close()
         return filename
 
-    # def save_call(self, replace=False, max_framerate=None):
-    #     print("works")
-    #     print(self)
-    #     call_start=round(call.start_time-buffer_label,1)
-    #     call_length=round(buffer_label+call.end_time-call_start,1)
-    #     audioname = self.get_soundfile_name()
-    #     output_name= audioname
-    #     outputpath = os.path.join(settings.TRAINING_PATH, output_name)
-    #     inputpath = os.path.join(settings.MEDIA_ROOT,settings.SNIPPET_DIR,audioname)
-    #     if not os.path.exists(outputpath):
-    #         replace = True
-    #     if replace:
-    #         wav_file = open(inputpath, 'w')
-    #         wavy.slice_wave(outputpath, wav_file, call_start, call_length, max_framerate=max_framerate)
-    #         wav_file.close()
-    #     return outputpath
+    def save_call(self, replace=False, path='', call_start='',call_length='', max_framerate=None):
+        try:
+            if not os.path.exists(path):
+                replace = True
+        except (ValueError, SuspiciousOperation, AttributeError):
+            replace = True
+        if replace:
+            print("Saving call",path)
+            wav_file = open(path, 'w')
+            wavy.slice_wave(self.recording.path, wav_file, self.offset+call_start, call_length, max_framerate=max_framerate)
+            wav_file.close()
 
     def url_path(self):
         full_path = self.recording.path
