@@ -29,61 +29,49 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         analysis = args[0]
         user = options.get('user', '')
-        #tags = CallLabel.objects.filter(tag__name="Hihi")
         tags = args[1:]
-        print ("tags=",tags,"analysis=",analysis)
         identifications = Identification.objects.filter(analysisset__analysis__code=analysis)
-        #print ("identifications=",identifications)
         if user:
             identifications = identifications.filter(user__username=user)
 
         call_labels = CallLabel.objects.filter(analysisset__analysis__code=analysis)
-        #print ("call_lables=",call_labels)
         if user:
             call_labels = call_labels.filter(user__username=user)
 
-        #FIrstly, ensure that all the snippets are present
-        # if options['get_snippets']:
-        #     print "Creating snippets"
-        #     path = '/sample_calls'
-        #     #scores = Scores.objects.filter(analysisset__snippet=snippet)
-        #     #print scores
-        #     for call in calls:
-        #         if call.tag.code in tags:
-        #             audioname = call.analysisset.snippet.get_soundfile_name()
-        #             identification.analysisset.snippet.save_calls(replace=False, path=path, max_framerate=24000)
+        #Save the calls of the species into the species folder
         buffer_label=0.1
+        snippets_call=[]
         for call in call_labels:
             if call.tag.code in tags:
-                hihi_snippets=Snippet.objects.filter(id=call.analysisset.snippet.id)
-                #print(hihi_snippets)
-                for snippet in hihi_snippets:
-                    #snippet.save_call(replace=False,  max_framerate=24000)                    
-                    call_start=round(call.start_time-buffer_label,1)
-                    call_length=round(buffer_label+call.end_time-call_start,1)
-                    audioname = call.analysisset.snippet.get_soundfile_name()
-                    output_name= audioname
-                    #TODO output_name= call_start,audioname
-                    print(call_start,output_name)
-                    outputpath = os.path.join(TRAINING_PATH, output_name)
-                    inputpath = os.path.join(MEDIA_ROOT,SNIPPET_DIR,audioname)
-                    print(inputpath,outputpath,call_start,call_length,24000)
-                    wavy.slice_wave(inputpath,outputpath,call_start,call_length, max_framerate=24000)
-
-                    # buffer_label=0.1
-                    # call_start=round(call.start_time-buffer_label,1)
-                    # call_length=round(buffer_label+call.end_time-call_start,1)
-                    # audioname = call.analysisset.snippet.get_soundfile_name()
-                    # output_name= audioname
-                    # #TODO output_name= call_start,audioname
-                    # print(call_start,audioname)
-                    # outputpath = os.path.join(TRAINING_PATH, output_name)
-                    # inputpath = os.path.join(MEDIA_ROOT,SNIPPET_DIR,audioname)
-                    # print(inputpath,outputpath,call_start,call_length,24000)
-                    # wav_file = open(inputpath, 'w')
-                    # wavy.slice_wave(inputpath,outputpath,call_start,call_length, max_framerate=24000)
-                    # wav_file.close()
-                    # #identification.analysisset.snippet.save_call(replace=False, path=path, max_framerate=24000)
+                call_start=call.start_time-buffer_label
+                call_length=buffer_label+call.end_time-call_start
+                #audioname = call.analysisset.snippet.get_soundfile_name()
+                #Get filename based on the style used by victor
+                snippet=call.analysisset.snippet
+                recording_date= snippet.recording.datetime
+                rec_day=str("%02d" % (recording_date.day))
+                rec_month=str("%02d" % (recording_date.month))
+                rec_year=str(recording_date.year)[2:4]
+                rec_hour=str("%02d" % (recording_date.hour))
+                rec_min=str("%02d" % (recording_date.minute))
+                rec_sec=str("%02d" % (recording_date.second))
+                filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
+                filename_site=str(snippet.recording.deployment.site.code)
+                filename_recorder=str(snippet.recording.deployment.recorder.code)
+                filename_call=str(call.id)
+                filename_path=filename_date+filename_site+filename_recorder+"_"+filename_call+".wav"
+                species=tags[0]
+                path = os.path.join(TRAINING_PATH,species,filename_path)
+                call.analysisset.snippet.save_call(replace=False, path=path,call_start=call_start,call_length=call_length, max_framerate=24000)
+                #save the snippets that had a call from the species of interest
+                snippets_call.append(str(call.analysisset.id))
+        #Save the audio without species call into the non-species folder
+        snippets_call=snippets_call[-1]
+        no_species_identifications=identifications.exclude(analysisset__id=snippets_call)
+        for snippet in no_species_identifications:
+            species="no_"+tags[0]
+            path=os.path.join(TRAINING_PATH, species)
+            snippet.analysisset.snippet.save_soundfile(replace=False, path=path, max_framerate=24000)
 
 
         # #process the calls
