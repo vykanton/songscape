@@ -7,6 +7,8 @@ from www.settings import TRAINING_PATH, MEDIA_ROOT, SNIPPET_DIR
 from www.recordings.models import Identification, CallLabel, Score, Snippet
 
 import wavy
+import datetime
+import csv
 
 
 # Normalise the call time
@@ -72,6 +74,27 @@ class Command(BaseCommand):
             species="no_"+tags[0]
             path=os.path.join(TRAINING_PATH, species)
             snippet.analysisset.snippet.save_soundfile(replace=False, path=path, max_framerate=24000)
+
+        #Save the snippets scored and the detection
+        filename=str(analysis[0:])+str(datetime.datetime.now().strftime('%y%m%d%H%M%S') )+'.csv'
+        csv_path=os.path.join(TRAINING_PATH,filename)
+        print(csv_path)
+        csv_file = open(csv_path, 'w')
+        writer = csv.writer(csv_file)
+        writer.writerow(['username','species','site','time','score','detector','detector_version'])
+        for snippet in identifications:
+            username=
+            species=
+            site=
+            time=
+            score=
+            detector=
+            detector_version=
+            users = User.objects.all().values_list('username', 'first_name', 'last_name', 'email')
+            for user in users:
+                writer.writerow(user)
+
+
 
 
         # #process the calls
