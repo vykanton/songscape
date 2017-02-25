@@ -307,7 +307,10 @@ class Snippet(models.Model):
         if replace:
             print("Saving call",path)
             wav_file = open(path, 'w')
-            wavy.slice_wave(self.recording.path, wav_file, self.offset+call_start, call_length, max_framerate=max_framerate)
+            if call_start:
+                wavy.slice_wave(self.recording.path, wav_file, self.offset, call_length, max_framerate=max_framerate)
+            else:
+                wavy.slice_wave(self.recording.path, wav_file, self.offset+call_start, call_length, max_framerate=max_framerate)
             wav_file.close()
 
     def url_path(self):

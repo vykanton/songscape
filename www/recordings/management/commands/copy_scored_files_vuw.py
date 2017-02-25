@@ -40,7 +40,7 @@ class Command(BaseCommand):
         if user:
             call_labels = call_labels.filter(user__username=user)
 
-        #Save the calls of the species into the species folder
+        #Save the audio calls of the species into the species folder
         buffer_label=0.1
         snippets_call=[]
         for call in call_labels:
@@ -70,69 +70,61 @@ class Command(BaseCommand):
         #Save the audio without species call into the non-species folder
         snippets_call=snippets_call[-1]
         no_species_identifications=identifications.exclude(analysisset__id=snippets_call)
-        for snippet in no_species_identifications:
+        for no_id in no_species_identifications:
+            snippet=no_id.analysisset.snippet
+            snippet_start=snippet.offset
+            snippet_length=snippet.duration
+            recording_date= snippet.recording.datetime
+            rec_day=str("%02d" % (recording_date.day))
+            rec_month=str("%02d" % (recording_date.month))
+            rec_year=str(recording_date.year)[2:4]
+            rec_hour=str("%02d" % (recording_date.hour))
+            rec_min=str("%02d" % (recording_date.minute))
+            rec_sec=str("%02d" % (recording_date.second))
+            filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
+            filename_site=str(snippet.recording.deployment.site.code)
+            filename_recorder=str(snippet.recording.deployment.recorder.code)
+            filename_minutes=str(int(snippet_start))
+            filename_path=filename_date+filename_site+filename_recorder+"_"+filename_minutes+".wav"
             species="no_"+tags[0]
-            path=os.path.join(TRAINING_PATH, species)
-            snippet.analysisset.snippet.save_soundfile(replace=False, path=path, max_framerate=24000)
+            path = os.path.join(TRAINING_PATH,species,filename_path)
+            snippet.save_call(replace=False, path=path,call_start=snippet_start,call_length=snippet_length, max_framerate=24000)
 
-        #Save the snippets scored and the detection
-        filename=str(analysis[0:])+str(datetime.datetime.now().strftime('%y%m%d%H%M%S') )+'.csv'
+        #Save a csv file of the snippets scored and the detection
+        #Save the labels submitted for each snippet
+        filename='labels'+str(analysis[0:])+str(datetime.datetime.now().strftime('%y%m%d%H%M%S') )+'.csv'
         csv_path=os.path.join(TRAINING_PATH,filename)
         print(csv_path)
         csv_file = open(csv_path, 'w')
         writer = csv.writer(csv_file)
-        writer.writerow(['username','species','site','time','score','detector','detector_version'])
-        for snippet in identifications:
-            username=
-            species=
-            site=
-            time=
-            score=
-            detector=
-            detector_version=
-            users = User.objects.all().values_list('username', 'first_name', 'last_name', 'email')
-            for user in users:
-                writer.writerow(user)
+        writer.writerow(['snippet_id','username','call_id','call',"call_start","call_length",'high_frequency','low_frequency'])
+        for call in call_labels:
+            snippet=call.analysisset.snippet
+            snippet_id=snippet.id
+            username=call.user.username
+            call_id=call.id
+            species=call.tag.code
+            call_start=call.start_time
+            call_length=call.end_time-call.start_time
+            high_frequency=call.high_frequency
+            low_frequency=call.low_frequency
+            writer.writerow([snippet_id,username,call_id,species,call_start,call_length,high_frequency,low_frequency])
 
-
-
-
-        # #process the calls
-        # calls = {}
-        # for identification in identifications:
-        #     snippet_score=Score.objects.filter(snippet__id=identification.analysisset.snippet.id).values_list('score',flat=True)[0]
-        #     print("score1=",snippet_score)
-        #     calls[identification.analysisset.snippet.get_soundfile_name()] = []
-        #
-        # for call in call_labels:
-        #     if call.tag.code in tags:
-        #         snippet_score=Score.objects.filter(snippet__id=call.analysisset.snippet.id).values_list('score',flat=True)[0]
-        #         print("score2=",snippet_score)
-        #         calls[call.analysisset.snippet.get_soundfile_name()].append((standardize(call.start_time),standardize(call.end_time),snippet_score))
-        #         print calls
-        #
-        # # Now output the data
-        # output = open('call-labels-%s.txt' % ('-'.join(tags)), 'w')
-        # for soundfile, labels in calls.items():
-        #     labels.sort()
-        #     stack = []
-        #     for i, label in enumerate(labels):
-        #         if i == 0:
-        #             stack.append(label[0])
-        #             stack.append(label[1])
-        #         if i > 0:
-        #             if label[0] > stack[-1]:
-        #                 stack.append(label[0])
-        #                 stack.append(label[1])
-        #                 stack.append(label[2])
-        #             else:
-        #                 stack.pop()
-        #                 stack.append(label[1])
-        #     if not sorted(stack) == stack:
-        #         print stack
-        #         raise ValueError, 'call times should be sorted'
-        #     #print stack
-        #     output.write(soundfile + ' ')
-        #     output.write(' '.join([str(s) for s in stack]))
-        #     output.write('\n')
-        # output.close()
+        #Save the snippets analysed, site info and their scores
+        filename='analysed'+str(analysis[0:])+str(datetime.datetime.now().strftime('%y%m%d%H%M%S') )+'.csv'
+        csv_path=os.path.join(TRAINING_PATH,filename)
+        print(csv_path)
+        csv_file = open(csv_path, 'w')
+        writer = csv.writer(csv_file)
+        writer.writerow(['snippet_id','username','site','date','snippet_start','recorder','score','detector'])
+        for identification in identifications:
+            snippet=identification.analysisset.snippet
+            snippet_id=snippet.id
+            username=identification.user.username
+            site=snippet.recording.deployment.site.code
+            date= snippet.recording.datetime
+            snippet_start=snippet.offset
+            recorder=snippet.recording.deployment.recorder.code
+            score=Score.objects.get(snippet__id=snippet_id)
+            detector=identification.analysisset.selection_method
+            writer.writerow([snippet_id,username,site,date,snippet_start,recorder,score,detector])
