@@ -116,7 +116,7 @@ class Command(BaseCommand):
         print(csv_path)
         csv_file = open(csv_path, 'w')
         writer = csv.writer(csv_file)
-        writer.writerow(['snippet_id','username','site','date','snippet_start','recorder','score','detector'])
+        writer.writerow(['snippet_id','username','site','date','snippet_start','recorder','score','detector','version'])
         for identification in identifications:
             snippet=identification.analysisset.snippet
             snippet_id=snippet.id
@@ -125,6 +125,8 @@ class Command(BaseCommand):
             date= snippet.recording.datetime
             snippet_start=snippet.offset
             recorder=snippet.recording.deployment.recorder.code
-            score=Score.objects.get(snippet__id=snippet_id)
-            detector=identification.analysisset.selection_method
-            writer.writerow([snippet_id,username,site,date,snippet_start,recorder,score,detector])
+            score=Score.objects.filter(snippet__id=snippet_id)
+            for score_detector in score:
+                detector=score_detector.detector.code
+                version=score_detector.detector.version
+                writer.writerow([snippet_id,username,site,date,snippet_start,recorder,score_detector,detector,version])
