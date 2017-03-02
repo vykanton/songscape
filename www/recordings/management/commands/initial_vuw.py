@@ -19,7 +19,7 @@ class Command(BaseCommand):
         for row in organisation:
             #check if organisation already exists
             org_exists = Organisation.objects.filter(code=row['Code']).exists()
-            if ~org_exists:
+            if not org_exists:
                 o = Organisation(code=row['Code'], name=row['Name'])
                 o.save()
 
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                      organisation=vicu_org
                 ).exists()
 
-            if ~site_exists:
+            if not site_exists:
                 o = Site(code=row['Code'], latitude=row['Latitude'], longitude=row['Longitude'], description=row['Comments'], organisation=vicu_org)
                 o.save()
 
@@ -56,7 +56,7 @@ class Command(BaseCommand):
             ).filter(
                 organisation=vicu_org
             ).exists()
-            if ~recorder_exists:
+            if not recorder_exists:
                 o = Recorder(code=row['Code'], organisation=vicu_org)
                 o.save()
 
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                     start_timezone='UTC'
             ).exists()
 
-            if ~deployment_exists:
+            if not deployment_exists:
                 o = Deployment(site=site, recorder=recorder, start=start, end=end, comments='NA', owner=vicu_org, start_timezone='UTC')
                 o.save()
 
@@ -96,7 +96,7 @@ class Command(BaseCommand):
             ).filter(
                 name=row['Name']
             ).exists()
-            if ~tag_exists:
+            if not tag_exists:
                 o = Tag(code=row['Code'], name=row['Name'])
                 o.save()
 
@@ -111,6 +111,6 @@ class Command(BaseCommand):
             ).filter(
                 user_id=row['User_id']
             )
-            if ~analysis_exists:
+            if not analysis_exists:
                 o = Analysis(name=row['Name'], code=row['Code'], description=row['Description'], user_id=row['User_id'])
                 o.save()
