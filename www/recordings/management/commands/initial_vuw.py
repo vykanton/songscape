@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 description=row['Description']
             ).filter(
                 user_id=row['User_id']
-            )
+            ).exists()
             if not analysis_exists:
                 o = Analysis(name=row['Name'], code=row['Code'], description=row['Description'], user_id=row['User_id'])
                 o.save()
