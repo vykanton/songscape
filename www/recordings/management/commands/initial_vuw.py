@@ -91,7 +91,7 @@ class Command(BaseCommand):
 
         tags = csv.DictReader(open(os.path.join(DIR, 'Tags.csv')))
         for row in tags:
-            tag_exists = Tag.object.filter(
+            tag_exists = Tag.objects.filter(
                 code=row['Code']
             ).filter(
                 name=row['Name']
