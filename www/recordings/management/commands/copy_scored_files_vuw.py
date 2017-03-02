@@ -1,10 +1,10 @@
 import os
 import random
 import shutil
-from optparse import make_option
+import argparse
 from django.core.management.base import BaseCommand, CommandError
 from www.settings import TRAINING_PATH, MEDIA_ROOT, SNIPPET_DIR
-from www.recordings.models import Identification, CallLabel, Score, Snippet
+from www.recordings.models import Identification, CallLabel, Score, Snippet, Tag
 
 import wavy
 import datetime
@@ -16,22 +16,29 @@ def standardize(t):
     return min(60, max(float(t), 0))
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--user',
-            dest='user',
-            help='restrict to analysis by this user'),
-        make_option("--no-snippets",
-            action="store_false",
-            dest="get_snippets",
-            default=True,
-            help="Get the snippets"),
-        )
-
+    def add_arguments(self, parser):
+        super(Command, self).add_arguments(parser)
+        parser.add_argument(
+            '--user',action="store",dest='user',default=False,
+            help='Restrict to analysis by this user')
+        parser.add_argument(
+            '--analysis_id',action="store",dest='analysis',default=False,
+            help='Restrict to this analysis')
+        parser.add_argument(
+            "--snippets",action="store",
+            dest="get_snippets",default=False,
+            help="Get the snippets")
+        parser.add_argument(
+            "--tags",action="store",dest="tag",
+            default=False,help="Restric only to these tags")
 
     def handle(self, *args, **options):
-        analysis = args[0]
+        analysis = options.get('analysis', '')
         user = options.get('user', '')
-        tags = args[1:]
+        tags = options.get('tag', '')
+        get_snippets=options.get('get_snippets', '')
+        if tags == False:
+            tags = Tag.objects.values_list('code', flat=True)
         identifications = Identification.objects.filter(analysisset__analysis__code=analysis)
         if user:
             identifications = identifications.filter(user__username=user)
@@ -40,16 +47,42 @@ class Command(BaseCommand):
         if user:
             call_labels = call_labels.filter(user__username=user)
 
-        #Save the audio calls of the species into the species folder
-        buffer_label=0.1
-        snippets_call=[]
-        for call in call_labels:
-            if call.tag.code in tags:
-                call_start=call.start_time-buffer_label
-                call_length=buffer_label+call.end_time-call_start
-                #audioname = call.analysisset.snippet.get_soundfile_name()
-                #Get filename based on the style used by victor
-                snippet=call.analysisset.snippet
+        if options['get_snippets']:
+            print "Creating snippets"
+            #Save the audio calls of the species into the species folder
+            buffer_label=0.1
+            snippets_call=[]
+            for call in call_labels:
+                if call.tag.code in tags:
+                    call_start=call.start_time-buffer_label
+                    call_length=buffer_label+call.end_time-call_start
+                    #audioname = call.analysisset.snippet.get_soundfile_name()
+                    #Get filename based on the style used by victor
+                    snippet=call.analysisset.snippet
+                    recording_date= snippet.recording.datetime
+                    rec_day=str("%02d" % (recording_date.day))
+                    rec_month=str("%02d" % (recording_date.month))
+                    rec_year=str(recording_date.year)[2:4]
+                    rec_hour=str("%02d" % (recording_date.hour))
+                    rec_min=str("%02d" % (recording_date.minute))
+                    rec_sec=str("%02d" % (recording_date.second))
+                    filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
+                    filename_site=str(snippet.recording.deployment.site.code)
+                    filename_recorder=str(snippet.recording.deployment.recorder.code)
+                    filename_call=str(call.id)
+                    filename_path=filename_date+filename_site+filename_recorder+"_"+filename_call+".wav"
+                    species=tags
+                    path = os.path.join(TRAINING_PATH,species,filename_path)
+                    call.analysisset.snippet.save_call(replace=False, path=path,call_start=call_start,call_length=call_length, max_framerate=24000)
+                    #save the snippets that had a call from the species of interest
+                    snippets_call.append(str(call.analysisset.id))
+            #Save the audio without species call into the non-species folder
+            snippets_call=snippets_call[-1]
+            no_species_identifications=identifications.exclude(analysisset__id=snippets_call)
+            for no_id in no_species_identifications:
+                snippet=no_id.analysisset.snippet
+                snippet_start=snippet.offset
+                snippet_length=snippet.duration
                 recording_date= snippet.recording.datetime
                 rec_day=str("%02d" % (recording_date.day))
                 rec_month=str("%02d" % (recording_date.month))
@@ -60,35 +93,11 @@ class Command(BaseCommand):
                 filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
                 filename_site=str(snippet.recording.deployment.site.code)
                 filename_recorder=str(snippet.recording.deployment.recorder.code)
-                filename_call=str(call.id)
-                filename_path=filename_date+filename_site+filename_recorder+"_"+filename_call+".wav"
-                species=tags[0]
+                filename_minutes=str(int(snippet_start))
+                filename_path=filename_date+filename_site+filename_recorder+"_"+filename_minutes+".wav"
+                species="no_"+tags
                 path = os.path.join(TRAINING_PATH,species,filename_path)
-                call.analysisset.snippet.save_call(replace=False, path=path,call_start=call_start,call_length=call_length, max_framerate=24000)
-                #save the snippets that had a call from the species of interest
-                snippets_call.append(str(call.analysisset.id))
-        #Save the audio without species call into the non-species folder
-        snippets_call=snippets_call[-1]
-        no_species_identifications=identifications.exclude(analysisset__id=snippets_call)
-        for no_id in no_species_identifications:
-            snippet=no_id.analysisset.snippet
-            snippet_start=snippet.offset
-            snippet_length=snippet.duration
-            recording_date= snippet.recording.datetime
-            rec_day=str("%02d" % (recording_date.day))
-            rec_month=str("%02d" % (recording_date.month))
-            rec_year=str(recording_date.year)[2:4]
-            rec_hour=str("%02d" % (recording_date.hour))
-            rec_min=str("%02d" % (recording_date.minute))
-            rec_sec=str("%02d" % (recording_date.second))
-            filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
-            filename_site=str(snippet.recording.deployment.site.code)
-            filename_recorder=str(snippet.recording.deployment.recorder.code)
-            filename_minutes=str(int(snippet_start))
-            filename_path=filename_date+filename_site+filename_recorder+"_"+filename_minutes+".wav"
-            species="no_"+tags[0]
-            path = os.path.join(TRAINING_PATH,species,filename_path)
-            snippet.save_call(replace=False, path=path,call_start=snippet_start,call_length=snippet_length, max_framerate=24000)
+                snippet.save_call(replace=False, path=path,call_start=snippet_start,call_length=snippet_length, max_framerate=24000)
 
         #Save a csv file of the snippets scored and the detection
         #Save the labels submitted for each snippet

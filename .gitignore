@@ -20,4 +20,3 @@ static/*
 .coverage
 nosetests.xml
 numpy-wavy/
-extract_snippets_vuw_morning.py
