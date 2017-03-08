@@ -30,6 +30,8 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
     recordings = Recording.objects.filter(pk__in = cpu_recording_ids)
     hihi_detector = Detector.objects.get(pk = hihi_detector_id)
 
+    now = time.time()
+
     for recording in recordings:
         snippets = Snippet.objects.filter(recording=recording).exclude(scores__detector=hihi_detector).order_by('offset')
         if len(snippets):
