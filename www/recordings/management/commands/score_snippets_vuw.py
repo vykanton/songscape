@@ -94,6 +94,7 @@ class Command(BaseCommand):
 
         if len(recording_ids) < cpus:
             num_jobs = len(recording_ids)
+            recordings_per_cpu = recording_ids #ie one per cpu
         else:
             num_jobs = cpus
 
