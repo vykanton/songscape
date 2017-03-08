@@ -37,7 +37,7 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
                 try:
                     audio = Audio(*get_audio(recording.path, snippet.offset, snippet.duration))
                     count = 0
-                    for detector, in detectors:
+                    for detector in detectors:
                         score = detector.score(audio)
                         if not count:
                             print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)
@@ -64,13 +64,13 @@ class Command(BaseCommand):
         detectors=[HihiCNN(HIHI_DETECTOR)]
         db_detectors = []
         now = time.time()
-        for detector in detectors:
+        for d in detectors:
             try:
-                db_detectors.append(Detector.objects.get(code=detector.code, version=detector.version))
+                db_detectors.append(Detector.objects.get(code=d.code, version=d.version))
             except Detector.DoesNotExist:
-                db_detectors.append(Detector(code=detector.code,
-                    version=detector.version,
-                    description=detector.description))
+                db_detectors.append(Detector(code=d.code,
+                    version=d.version,
+                    description=d.description))
                 db_detectors[-1].save()
         #detectors = zip(detectors, db_detectors)
         hihi_detector = Detector.objects.get(code = 'hihi')
@@ -80,9 +80,9 @@ class Command(BaseCommand):
         recording_ids = [recording.id for recording in recordings]
         hihi_detector_id = hihi_detector.id
 
-        l=recordings_id
-        cpus=mp.cpu_count
-        n=cpus-1 # as we want the remainder of jobs in the last CPU. FIXME cases where it divides evenly
+        l = recording_ids
+        cpus = mp.cpu_count()
+        n = cpus-1 # as we want the remainder of jobs in the last CPU. FIXME cases where it divides evenly
 
         #Divide recordings as evenly as possible betwen cpus. A nested list, each sublist is the recording ids for a cpu.
         recordings_per_cpu = [l[i:i + n] for i in xrange(0, len(l), n)]
