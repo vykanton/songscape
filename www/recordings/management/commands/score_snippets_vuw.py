@@ -92,9 +92,14 @@ class Command(BaseCommand):
         # close db all db connections before going multicore
         db.connections.close_all()
 
-        job=[]
-        for cpu in range(cpus):
-            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors)
+        if len(recording_ids) < cpus:
+            num_jobs = len(recording_ids)
+        else:
+            num_jobs = cpus
+
+        jobs=[]
+        for cpu in range(num_jobs):
+            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors))
             jobs.append(p)
             p.start()
 
