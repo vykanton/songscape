@@ -89,5 +89,17 @@ class Command(BaseCommand):
         #Divide recordings as evenly as possible betwen cpus. A nested list, each sublist is the recording ids for a cpu.
         recordings_per_cpu = [l[i:i + n] for i in xrange(0, len(l), n)]
 
-        #test worker code
-        worker(recordings_per_cpu[0], hihi_detector_id, detectors)
+        # close db all db connections before going multicore
+        db.connections.close_all()
+
+        job=[]
+        for cpu in range(cpus):
+            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors)
+            jobs.append(p)
+            p.start()
+
+        #wait for all jobs to end
+        for p in jobs:
+            p.join()
+        print ('mutiprocessing done')
+        #worker(recordings_per_cpu[0], hihi_detector_id, detectors)
