@@ -9,7 +9,7 @@ fabric
 coverage
 django-debug-toolbar
 git+https://github.com/mozilla/django-browserid.git@04e4a860e282432
-https://github.com/vykanton/kokako
+git+https://github.com/vykanton/kokako
 pymongo
 django-nose==1.4.3
 nose-cov
