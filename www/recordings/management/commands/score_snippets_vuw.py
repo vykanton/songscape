@@ -14,7 +14,7 @@ from wavy import get_audio
 from wave import Error as WaveError
 
 from www.recordings.models import Score, Recording, Snippet, Detector
-from www.settings import HIHI_DETECTOR
+from www.settings import HIHI_DETECTOR, DETECTOR_CORES
 
 import multiprocessing as mp
 
@@ -63,7 +63,7 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        detectors=[HihiCNN(HIHI_DETECTOR)]
+        detectors=[HihiCNN(HIHI_DETECTOR, DETECTOR_CORES)]
         db_detectors = []
         now = time.time()
         for d in detectors:
