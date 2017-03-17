@@ -99,13 +99,13 @@ class Command(BaseCommand):
             num_jobs = cpus
 
         jobs=[]
-        for cpu in range(num_jobs):
-            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors))
-            jobs.append(p)
-            p.start()
-
-        #wait for all jobs to end
-        for p in jobs:
-            p.join()
-        print ('mutiprocessing done')
-        #worker(recordings_per_cpu[0], hihi_detector_id, detectors)
+        # for cpu in range(num_jobs):
+        #     p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors))
+        #     jobs.append(p)
+        #     p.start()
+        #
+        # #wait for all jobs to end
+        # for p in jobs:
+        #     p.join()
+        # print ('mutiprocessing done')
+        worker(recordings_per_cpu[0], hihi_detector_id, detectors)
