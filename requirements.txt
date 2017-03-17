@@ -13,4 +13,5 @@ git+https://github.com/vykanton/kokako
 pymongo
 django-nose==1.4.3
 nose-cov
-pytz 
+pytz
+tensorflow

@@ -45,6 +45,9 @@ TRAINING_PATH = 'sample_calls'
 DETECTOR_PATH = '/opt/songscape/detectors/'
 HIHI_DETECTOR = DETECTOR_PATH+'hihi.pb'
 
+#Number of cores to use for the CNN detector.  Use a single core for high thoughput parallel computation.
+DETECTOR_CORES = 1
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
