@@ -70,15 +70,37 @@ class Command(BaseCommand):
                     filename_site=str(snippet.recording.deployment.site.code)
                     filename_recorder=str(snippet.recording.deployment.recorder.code)
                     filename_call=str(call.id)
-                    filename_path=filename_date+filename_site+filename_recorder+"_"+filename_call+".wav"
+                    filename_path=filename_date+filename_site+filename_recorder+"_"+filename_call+"_call"+".wav"
                     species=tags
                     path = os.path.join(TRAINING_PATH,species,filename_path)
                     call.analysisset.snippet.save_call(replace=False, path=path,call_start=call_start,call_length=call_length, max_framerate=24000)
                     #save the snippets that had a call from the species of interest
                     snippets_call.append(str(call.analysisset.id))
+
+            #Save the snippets with the calls of the species into the species folder
+            snippets_call=list(set(snippets_call))
+            for snippet_id in snippets_call:
+                snippet=identifications.get(analysisset__id=snippet_id).analysisset.snippet
+                snippet_start=snippet.offset
+                snippet_length=snippet.duration
+                recording_date= snippet.recording.datetime
+                rec_day=str("%02d" % (recording_date.day))
+                rec_month=str("%02d" % (recording_date.month))
+                rec_year=str(recording_date.year)[2:4]
+                rec_hour=str("%02d" % (recording_date.hour))
+                rec_min=str("%02d" % (recording_date.minute))
+                rec_sec=str("%02d" % (recording_date.second))
+                filename_date=rec_day+rec_month+rec_year+rec_hour+rec_min+rec_sec
+                filename_site=str(snippet.recording.deployment.site.code)
+                filename_recorder=str(snippet.recording.deployment.recorder.code)
+                filename_minutes=str(int(snippet_start))
+                filename_path=filename_date+filename_site+filename_recorder+"_"+filename_minutes+"_snippet"+".wav"
+                species=tags
+                path = os.path.join(TRAINING_PATH,species,filename_path)
+                snippet.save_call(replace=False, path=path,call_start=snippet_start,call_length=snippet_length, max_framerate=24000)
+
             #Save the audio without species call into the non-species folder
-            snippets_call=snippets_call[-1]
-            no_species_identifications=identifications.exclude(analysisset__id=snippets_call)
+            no_species_identifications=identifications.exclude(analysisset__id__in=snippets_call)
             for no_id in no_species_identifications:
                 snippet=no_id.analysisset.snippet
                 snippet_start=snippet.offset
