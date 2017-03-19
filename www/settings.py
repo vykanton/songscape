@@ -38,6 +38,9 @@ SITE_ID = 1
 RECORDINGS_ROOT = '/kiwi/recordings'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 
+#Location the snippets will be written to.
+SNIPPETS_PATH = '/mnt/research_storage_snippets/media/snippets'
+
 # Absolute filesystem path to the directory that will hold species sample calls.
 TRAINING_PATH = 'sample_calls'
 
