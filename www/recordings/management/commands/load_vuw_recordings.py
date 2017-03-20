@@ -16,7 +16,6 @@ from django.db import IntegrityError
 
 from www.recordings.models import Deployment, Recording, Snippet
 
-BASE_PATH = 'vuw/halo'
 MIN_FILE_SIZE = 1000
 logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
