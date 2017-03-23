@@ -63,7 +63,7 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        detectors=[HihiCNN(HIHI_DETECTOR, DETECTOR_CORES)]
+        detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
         db_detectors = []
         now = time.time()
         for d in detectors:
