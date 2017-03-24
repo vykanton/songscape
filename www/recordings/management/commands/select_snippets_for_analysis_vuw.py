@@ -19,12 +19,12 @@ class Command(BaseCommand):
 
         #select snippets by hihi score
         #max_score=max(score)
-        max_score=20
-        threshold_score=1
-        category_length=3
+        max_score=100
+        threshold_score=60
+        category_length=5
         score_categories=range(threshold_score,max_score+category_length,category_length)
         #number of snippets per category
-        snippet_category=2
+        snippet_category=30
         hihi_snippets = snippets.filter(scores__detector=detector,
             scores__score__gt=threshold_score,recording__deployment__site__code__in=outside_sites).exclude(id__in=already)
 
