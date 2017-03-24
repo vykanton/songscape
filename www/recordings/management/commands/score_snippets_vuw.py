@@ -30,6 +30,10 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
     recordings = Recording.objects.filter(pk__in = cpu_recording_ids)
     hihi_detector = Detector.objects.get(pk = hihi_detector_id)
 
+    # Reinitialise detectors for multiprocessing - TODO this could be done in a cleaner way.
+    detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
+
+
     now = time.time()
 
     for recording in recordings:
@@ -63,7 +67,8 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        detectors=[HihiCNN(HIHI_DETECTOR, DETECTOR_CORES)]
+        # TODO don't initialise detectors here! do it in the worker
+        detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
         db_detectors = []
         now = time.time()
         for d in detectors:
