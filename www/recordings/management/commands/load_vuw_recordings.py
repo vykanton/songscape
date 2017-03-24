@@ -9,6 +9,7 @@ from contextlib import closing
 import logging
 import traceback
 import pytz
+from datetime import timedelta
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -75,16 +76,16 @@ class Command(BaseCommand):
                         if site_code and recorder_code:
                             deployment = Deployment.objects.get(recorder__code=recorder_code,
                                 site__code=site_code,
-                                start__lte=starttime,
-                                end__gte=starttime)
+                                start__lte=starttime+timedelta(days=1),
+                                end__gte=starttime-timedelta(days=1))
                         elif recorder_code:
                             deployment = Deployment.objects.get(recorder__code=recorder_code,
-                                start__lte=starttime,
-                                end__gte=starttime)
+                                start__lte=starttime+timedelta(days=1),
+                                end__gte=starttime-timedelta(days=1))
                         elif site_code:
                             deployment = Deployment.objects.get(site__code=site_code,
-                                start__lte=starttime,
-                                end__gte=starttime)
+                                start__lte=starttime+timedelta(days=1),
+                                end__gte=starttime-timedelta(days=1))
                         else:
                             logging.error('no site or recorder identified in path: %s', path)
                             continue
