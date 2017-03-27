@@ -42,7 +42,7 @@ MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
 SNIPPETS_PATH = '/mnt/research_storage_snippets/media/snippets'
 
 # Absolute filesystem path to the directory that will hold species sample calls.
-TRAINING_PATH = 'sample_calls'
+TRAINING_PATH = '/mnt/research_storage_snippets/sample_calls'
 
 # Absolute filesystem path to the directory that will hold Neural network detectors.
 DETECTOR_PATH = '/opt/songscape/detectors/'
