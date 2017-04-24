@@ -36,7 +36,7 @@ SITE_ID = 1
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 RECORDINGS_ROOT = '/kiwi/recordings'
-MEDIA_ROOT = os.path.join(PROJECT_DIR, 'media')
+MEDIA_ROOT = os.path.join('/mnt/research_storage_snippets', 'media')
 
 #Location the snippets will be written to.
 SNIPPETS_PATH = '/mnt/research_storage_snippets/media/snippets'

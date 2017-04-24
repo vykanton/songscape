@@ -18,7 +18,7 @@ from www.settings import HIHI_DETECTOR, DETECTOR_CORES
 
 import multiprocessing as mp
 
-def worker(cpu_recording_ids, hihi_detector_id, detectors):
+def worker(cpu_recording_ids, hihi_detector_id):
     '''
     Score snippets multiprocessing worker.
     It is ok to make database connections from inside the worker
@@ -67,19 +67,6 @@ def worker(cpu_recording_ids, hihi_detector_id, detectors):
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        # TODO don't initialise detectors here! do it in the worker
-        detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
-        db_detectors = []
-        now = time.time()
-        for d in detectors:
-            try:
-                db_detectors.append(Detector.objects.get(code=d.code, version=d.version))
-            except Detector.DoesNotExist:
-                db_detectors.append(Detector(code=d.code,
-                    version=d.version,
-                    description=d.description))
-                db_detectors[-1].save()
-        #detectors = zip(detectors, db_detectors)
         hihi_detector = Detector.objects.get(code = 'hihi')
         recordings = Recording.objects.all().order_by('?')
 
@@ -104,13 +91,13 @@ class Command(BaseCommand):
             num_jobs = cpus
 
         jobs=[]
-        # for cpu in range(num_jobs):
-        #     p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id, detectors))
-        #     jobs.append(p)
-        #     p.start()
-        #
-        # #wait for all jobs to end
-        # for p in jobs:
-        #     p.join()
-        # print ('mutiprocessing done')
-        worker(recordings_per_cpu[0], hihi_detector_id, detectors)
+        for cpu in range(num_jobs):
+            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id))
+            jobs.append(p)
+            p.start()
+
+        #wait for all jobs to end
+        for p in jobs:
+            p.join()
+        print ('mutiprocessing done')
+        # worker(recordings_per_cpu[0], hihi_detector_id, detectors)
