@@ -11,15 +11,19 @@ from django import db
 import time
 
 from kokako.detectors.hihi import HihiCNN
+from kokako.detectors.kakariki import KakarikiRNN
+from kokako.detectors.tieke import TiekeRNN
 
 from www.recordings.models import Score, Recording, Snippet, Detector
-from www.settings import HIHI_DETECTOR, DETECTOR_CORES
+from www.settings import DETECTOR_CORES, HIHI_DETECTOR, KAKARIKI_DETECTOR, TIEKE_DETECTOR
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
+        detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES),
+            kakarikiRNN(KAKARIKI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES),
+            tiekeRNN(TIEKE_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
         db_detectors = []
         now = time.time()
         for d in detectors:
