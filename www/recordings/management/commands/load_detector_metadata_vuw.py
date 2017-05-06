@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
         detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES),
             kakarikiRNN(KAKARIKI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES),
-            tiekeRNN(TIEKE_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
+            TiekeRNN(TIEKE_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
         db_detectors = []
         now = time.time()
         for d in detectors:
