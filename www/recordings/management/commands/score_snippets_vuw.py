@@ -48,7 +48,7 @@ def worker(cpu_recording_ids, detector_id):
     now = time.time()
 
     for recording in recordings:
-        snippets = Snippet.objects.filter(recording=recording).exclude(scores__detector=detector).order_by('offset')
+        snippets = Snippet.objects.filter(recording=recording).exclude(scores__detector=detector_model).order_by('offset')
         if len(snippets):
             for snippet in snippets:
                 try:
@@ -59,11 +59,11 @@ def worker(cpu_recording_ids, detector_id):
                         print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)
                         now = time.time()
                     try:
-                        s = Score.objects.get(detector=detector, snippet=snippet)
+                        s = Score.objects.get(detector=detector_model, snippet=snippet)
                         s.delete()
                     except Score.DoesNotExist:
                         pass
-                    s = Score(detector=detector, snippet=snippet,
+                    s = Score(detector=detector_model, snippet=snippet,
                         score=score)
                     s.save()
                     count += 1
