@@ -47,6 +47,8 @@ TRAINING_PATH = '/mnt/research_storage_snippets/sample_calls'
 # Absolute filesystem path to the directory that will hold Neural network detectors.
 DETECTOR_PATH = '/opt/songscape/detectors/'
 HIHI_DETECTOR = DETECTOR_PATH+'hihi.pb'
+KAKARIKI_DETECTOR = DETECTOR_PATH+'kakariki.pb'
+TIEKE_DETECTOR = DETECTOR_PATH+'tieke.pb'
 
 #Number of cores to use for the CNN detector.  Use a single core for high thoughput parallel computation.
 DETECTOR_CORES = 1
