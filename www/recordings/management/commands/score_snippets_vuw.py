@@ -76,13 +76,16 @@ def worker(cpu_recording_ids, detector_id):
                     print detector, snippet, 'Scoring failed', sys.exc_info()[0]
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument('detector_code', type=str)
     def handle(self, *args, **options):
-        hihi_detector = Detector.objects.get(code = 'hihi')
+        detector_code = options['detector_code']
+        detector = Detector.objects.get(code = detector_code)
         recordings = Recording.objects.all().order_by('?')
 
         #prep for multiprocessing - don't pass database objects into the multiprocessing pool.
         recording_ids = [recording.id for recording in recordings]
-        detector_id = hihi_detector.id
+        detector_id = detector.id
 
         l = recording_ids
         cpus = mp.cpu_count()
