@@ -10,15 +10,17 @@ from django import db
 
 from kokako.score import Audio
 from kokako.detectors.hihi import HihiCNN
+from kokako.detectors.kakariki import KakarikiRNN
+from kokako.detectors.tieke import TiekeRNN
 from wavy import get_audio
 from wave import Error as WaveError
 
 from www.recordings.models import Score, Recording, Snippet, Detector
-from www.settings import HIHI_DETECTOR, DETECTOR_CORES
+from www.settings import DETECTOR_CORES, HIHI_DETECTOR, KAKARIKI_DETECTOR, TIEKE_DETECTOR
 
 import multiprocessing as mp
 
-def worker(cpu_recording_ids, hihi_detector_id):
+def worker(cpu_recording_ids, detector_id):
     '''
     Score snippets multiprocessing worker.
     It is ok to make database connections from inside the worker
@@ -28,10 +30,19 @@ def worker(cpu_recording_ids, hihi_detector_id):
 
     # create new database connections for this worker.
     recordings = Recording.objects.filter(pk__in = cpu_recording_ids)
-    hihi_detector = Detector.objects.get(pk = hihi_detector_id)
+    detector_model = Detector.objects.get(pk = detector_id)
 
     # Reinitialise detectors for multiprocessing - TODO this could be done in a cleaner way.
-    detectors=[HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)]
+    if detector_model.code == 'hihi':
+        detector = HihiCNN(HIHI_DETECTOR, prediction_block_size=10, num_cores = DETECTOR_CORES)
+    elif detector_model.code == 'kakariki':
+        detector = KakarikiRNN(KAKARIKI_DETECTOR, num_cores = DETECTOR_CORES)
+    elif detector_model.code == 'tieke':
+        detector = TiekeRNN(TIEKE_DETECTOR, num_cores = DETECTOR_CORES)
+    else:
+        raise ValueError('Unknown detector code! - Make sure new detectors are added to code here!')
+        detector = None
+
 
 
     now = time.time()
@@ -43,20 +54,19 @@ def worker(cpu_recording_ids, hihi_detector_id):
                 try:
                     audio = Audio(*get_audio(recording.path, snippet.offset, snippet.duration))
                     count = 0
-                    for detector in detectors:
-                        score = detector.score(audio)
-                        if not count:
-                            print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)
-                            now = time.time()
-                        try:
-                            s = Score.objects.get(detector=hihi_detector, snippet=snippet)
-                            s.delete()
-                        except Score.DoesNotExist:
-                            pass
-                        s = Score(detector=hihi_detector, snippet=snippet,
-                            score=score)
-                        s.save()
-                        count += 1
+                    score = detector.score(audio)
+                    if not count:
+                        print '%s %0.1f %0.1f' % (snippet, time.time() - now, score)
+                        now = time.time()
+                    try:
+                        s = Score.objects.get(detector=hihi_detector, snippet=snippet)
+                        s.delete()
+                    except Score.DoesNotExist:
+                        pass
+                    s = Score(detector=hihi_detector, snippet=snippet,
+                        score=score)
+                    s.save()
+                    count += 1
                 except KeyboardInterrupt:
                     raise
                 except WaveError:
@@ -72,7 +82,7 @@ class Command(BaseCommand):
 
         #prep for multiprocessing - don't pass database objects into the multiprocessing pool.
         recording_ids = [recording.id for recording in recordings]
-        hihi_detector_id = hihi_detector.id
+        detector_id = hihi_detector.id
 
         l = recording_ids
         cpus = mp.cpu_count()
@@ -92,7 +102,7 @@ class Command(BaseCommand):
 
         jobs=[]
         for cpu in range(num_jobs):
-            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], hihi_detector_id))
+            p = mp.Process(target=worker, args=(recordings_per_cpu[cpu], detector_id))
             jobs.append(p)
             p.start()
 
@@ -100,4 +110,4 @@ class Command(BaseCommand):
         for p in jobs:
             p.join()
         print ('mutiprocessing done')
-        # worker(recordings_per_cpu[0], hihi_detector_id, detectors)
+        # worker(recordings_per_cpu[0], detector_id, detectors)
