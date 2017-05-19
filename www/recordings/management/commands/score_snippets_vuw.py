@@ -82,6 +82,8 @@ class Command(BaseCommand):
         detector_code = options['detector_code']
         detector = Detector.objects.get(code = detector_code)
         recordings = Recording.objects.all().order_by('?')
+        recordings = recordings.filter(datetime__hour__range=(05, 10))
+        print ('Warning! only using morning snippets!') #FIXME more elegant way for the user to select this
 
         #prep for multiprocessing - don't pass database objects into the multiprocessing pool.
         recording_ids = [recording.id for recording in recordings]
