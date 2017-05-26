@@ -74,6 +74,9 @@ def worker(cpu_recording_ids, detector_id):
                     break
                 except:
                     print detector, snippet, 'Scoring failed', sys.exc_info()[0]
+        else:
+            raise ValueError('There are no matching snippets to the recording in the database!')
+            
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
