@@ -11,7 +11,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         detector_code = options['detector_code']
         detector = Detector.objects.get(code = detector_code)
-        analysis = Analysis.objects.get(code=detector_code)
+        analysis_code = str(detector_code)+str('_id')
+        analysis = Analysis.objects.get(code=analysis_code)
         snippets = Snippet.objects.all()        
         already = snippets.filter(sets__analysis=analysis)
         score= Score.objects.all()
@@ -21,13 +22,13 @@ class Command(BaseCommand):
         #select snippets by score
         #max_score=max(score)
         max_score=100
-        threshold_score=60
-        category_length=5
+        threshold_score=99
+        category_length=1
         score_categories=range(threshold_score,max_score+category_length,category_length)
         #number of snippets per category
         snippet_category=10
         scored_snippets = snippets.filter(scores__detector=detector,
-            scores__score__gt=threshold_score,recording__deployment__site__code__in=outside_sites).exclude(id__in=already)
+            scores__score__gt=threshold_score,recording__deployment__site__code__in=outside_sites).exclude(id__in=already).order_by('?')
 
         #Now select random snippets within each score category
         #scored_snippets
