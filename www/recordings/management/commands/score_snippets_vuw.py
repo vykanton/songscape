@@ -48,11 +48,10 @@ def worker(cpu_recording_ids, detector_id):
             detector = None
 
 
-
         now = time.time()
 
         for recording in recordings:
-            snippets = Snippet.objects.filter(recording=recording).exclude(scores__detector=detector_model).order_by('offset')
+	    snippets = Snippet.objects.filter(recording=recording).order_by('offset')
             if len(snippets):
                 for snippet in snippets:
                     try:
@@ -79,7 +78,7 @@ def worker(cpu_recording_ids, detector_id):
                     except:
                         print detector, snippet, 'Scoring failed', sys.exc_info()[0]
             else:
-                raise ValueError('There are no matching snippets to the recording in the database!')
+                raise ValueError("Can't find the snippets for the recording %s" % (recording))
     else:
         #no recordings to process
         pass
