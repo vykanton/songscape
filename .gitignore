@@ -20,3 +20,9 @@ static/*
 .coverage
 nosetests.xml
 numpy-wavy/
+backup.sql
+backup_22_Jun.sql
+detectors/
+server.py
+tmp.txt
+
