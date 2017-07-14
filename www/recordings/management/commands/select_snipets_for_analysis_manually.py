@@ -38,6 +38,7 @@ class Command(BaseCommand):
 	call_snippet = list(snippets.filter(recording__deployment__site__code=site_code,recording__datetime=date_code,offset=minute_code).exclude(id__in=already))
         selected_snippet=[]
 	selected_snippet=list(call_snippet)
+	print(selected_snippet)
 	for snip in selected_snippet:
 		AnalysisSet(analysis=analysis,snippet=snip,selection_method="tieke 1.0.0").save()
 	print('snippet added to analysis')
