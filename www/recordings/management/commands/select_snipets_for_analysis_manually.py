@@ -29,20 +29,15 @@ class Command(BaseCommand):
         site_code = options['site_code']
         date_code = options['date_code']
         minute_code = options['minute_code']
-        print(site_code,date_code,minute_code)
         snippets = Snippet.objects.all()
-        snip = snippets.filter(recording__deployment__site__code=site_code,recording__datetime=date_code,offset=minute_code)
-        analysis = Analysis.objects.get(code='tieke_id')
-        print(snip)
-	
-        AnalysisSet(analysis=analysis, snippet=snip,selection_method=detector).save()
+	analysis = Analysis.objects.get(code='tieke_id')
+	analysis_already1=Analysis.objects.get(code='kakariki_id')
+        analysis_already2=Analysis.objects.get(code='tieke_id')
+        analysis_already3=Analysis.objects.get(code='hihi_id')
+	already = snippets.filter(sets__analysis__in=[analysis_already1,analysis_already2,analysis_already3])
+	call_snippet = list(snippets.filter(recording__deployment__site__code=site_code,recording__datetime=date_code,offset=minute_code).exclude(id__in=already))
+        selected_snippet=[]
+	selected_snippet=list(call_snippet)
+	for snip in selected_snippet:
+		AnalysisSet(analysis=analysis,snippet=snip,selection_method="tieke 1.0.0").save()
 	print('snippet added to analysis')
-
-        snippets = [x.snippet for x in AnalysisSet.objects.filter(analysis=analysis)]
-        print(snippets)
-	count = 0
-        for snippet in snippets:
-            count += 1
-            print len(snippets), count
-            snippet.save_sonogram()
-            snippet.save_soundfile()
