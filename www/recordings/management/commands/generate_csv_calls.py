@@ -20,10 +20,11 @@ class Command(BaseCommand):
                         'score_tieke','score_hihi','score_kakariki'])
         for call in call_labels:
             snippet_call = call.analysisset.snippet
+            snippet_id = snippet_call.id
             filename = str(snippet_call.recording.path)[24:48]
             call_id = call.id
             species = call.tag.code
-            snippet_start = snippet.offset
+            snippet_start = snippet_call.offset
             call_start = call.start_time+snippet_start
             call_length = call.end_time-call.start_time            
             high_frequency = call.high_frequency
