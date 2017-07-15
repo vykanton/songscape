@@ -21,7 +21,7 @@ class Command(BaseCommand):
         for call in call_labels:
             snippet_call = call.analysisset.snippet
             snippet_id = snippet_call.id
-            filename = str(snippet_call.recording.path)[24:48]
+            filename = str(snippet_call.recording.path)[44:70]
             call_id = call.id
             species = call.tag.code
             snippet_start = snippet_call.offset
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             score_tieke = Score.objects.filter(snippet__id=snippet_id,detector__code='tieke')
             score_hihi = Score.objects.filter(snippet__id=snippet_id,detector__code='hihi')
             score_kakariki = Score.objects.filter(snippet__id=snippet_id,detector__code='kakariki')
-            writer.writerow([filename,snippet_id,call_id,species,call_start,call_length,high_frequency,low_frequency,
+            writer.writerow([filename,call_id,species,call_start,call_length,high_frequency,low_frequency,
                             score_tieke,score_hihi,score_kakariki])
         
         print('file cereated')                                             
