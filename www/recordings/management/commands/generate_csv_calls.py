@@ -4,6 +4,7 @@ from www.settings import TRAINING_PATH
 from django.core.management.base import BaseCommand, CommandError
 from www.recordings.models import Identification, CallLabel, Score, Snippet, Tag
 
+import datetime
 import csv
 
 class Command(BaseCommand):
