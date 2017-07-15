@@ -9,7 +9,8 @@ import csv
 class Command(BaseCommand):
     def handle(self, *args, **options):
         call_labels = CallLabel.objects.all()
-        csv_path = os.path.join(TRAINING_PATH,filename)
+        csv_filename='labels'+str(datetime.datetime.now().strftime('%y%m%d%H%M%S') )+'.csv'
+        csv_path = os.path.join(TRAINING_PATH,csv_filename)
         print("csv_path",csv_path)
         csv_file = open(csv_path, 'w')
         print("csv_created")
