@@ -8,7 +8,7 @@ import csv
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        call_labels = call_labels.objects.all()
+        call_labels = CallLabel..objects.all()
         csv_path = os.path.join(TRAINING_PATH,filename)
         print("csv_path",csv_path)
         csv_file = open(csv_path, 'w')
