@@ -27,9 +27,10 @@ class Command(BaseCommand):
             call_length = call.end_time-call.start_time            
             high_frequency = call.high_frequency
             low_frequency = call.low_frequency
-            score_tieke = Score.objects.filter(snippet__id=snippet_id,detector__code='tieke)
+            score_tieke = Score.objects.filter(snippet__id=snippet_id,detector__code='tieke')
             score_hihi = Score.objects.filter(snippet__id=snippet_id,detector__code='hihi')
             score_kakariki = Score.objects.filter(snippet__id=snippet_id,detector__code='kakariki')
             writer.writerow([filename,snippet_id,call_id,species,call_start,call_length,high_frequency,low_frequency,
                             score_tieke,score_hihi,score_kakariki])
-                                             
+        
+        print('file cereated')                                             
