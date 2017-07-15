@@ -20,8 +20,7 @@ class Command(BaseCommand):
                         'score_tieke','score_hihi','score_kakariki'])
         for call in call_labels:
             snippet_call = call.analysisset.snippet
-            snippet = identifications.get(analysisset__id=snippet_call.id).analysisset.snippet
-            filename = str(snippet.recording.path)[24:48]
+            filename = str(snippet_call.recording.path)[24:48]
             call_id = call.id
             species = call.tag.code
             snippet_start = snippet.offset
