@@ -17,7 +17,7 @@ class Command(BaseCommand):
         print("csv_created")
         writer = csv.writer(csv_file)
         writer.writerow(['filename','call_id','call',"call_start","call_length",'high_frequency','low_frequency',
-                        'score_tieke','score_hihi','score_kakariki'])
+                        'score_tieke','score_hihi','score_kakariki','snippet_start','snippet_end'])
         for call in call_labels:
             snippet_call = call.analysisset.snippet
             snippet_id = snippet_call.id
@@ -25,6 +25,7 @@ class Command(BaseCommand):
             call_id = call.id
             species = call.tag.code
             snippet_start = snippet_call.offset
+            snippet_end = snippet_call.offset+60
             call_start = call.start_time+snippet_start
             call_length = call.end_time-call.start_time            
             high_frequency = call.high_frequency
@@ -33,6 +34,6 @@ class Command(BaseCommand):
             score_hihi = Score.objects.filter(snippet__id=snippet_id,detector__code='hihi')
             score_kakariki = Score.objects.filter(snippet__id=snippet_id,detector__code='kakariki')
             writer.writerow([filename,call_id,species,call_start,call_length,high_frequency,low_frequency,
-                            score_tieke,score_hihi,score_kakariki])
+                            score_tieke,score_hihi,score_kakariki,snippet_start,snippet_end])
         
         print('file cereated')                                             
